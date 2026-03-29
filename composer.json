@@ -1,0 +1,32 @@
+{
+  "name": "abather/relation-components",
+  "description": "column and entry for relations",
+  "keywords": [
+    "laravel",
+    "filament",
+    "relation",
+    "belongsTo",
+    "morphTo",
+    "textColumn",
+    "TextEntry"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/abather/relation-components",
+  "require": {
+    "php": "^8.2",
+    "filament/filament": "^4.0|^5.0"
+  },
+  "require-dev": {
+    "laravel/pint": "^1.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Abather\\RelationComponents\\": "src"
+    }
+  },
+  "config": {
+    "sort-packages": true
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}
