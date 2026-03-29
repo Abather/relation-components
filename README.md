@@ -4,8 +4,6 @@
 ![Relation Components](https://banners.beyondco.de/Relation%20Components.png?theme=light&packageManager=composer+require&packageName=abather%2Frelation-components&pattern=architect&style=style_1&description=Relation+%22BelongsTo%2C+MorphTo%22+TextColumn+and+TextEntry&md=1&showWatermark=1&fontSize=100px&images=https%3A%2F%2Flaravel.com%2Fimg%2Flogomark.min.svg)
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/abather/relation-components.svg?style=flat-square)](https://packagist.org/packages/abather/relation-components)
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/abather/relation-components/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/abather/relation-components/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/abather/relation-components/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/abather/relation-components/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/abather/relation-components.svg?style=flat-square)](https://packagist.org/packages/abather/relation-components)
 
 Filament table columns and infolist entries for `belongsTo` and `morphTo` relationships.
