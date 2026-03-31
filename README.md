@@ -8,6 +8,10 @@
 
 Filament table columns and infolist entries for `belongsTo` and `morphTo` relationships.
 
+## Requirements
+
+- [Filament](https://filamentphp.com) v4+
+
 ## Installation
 
 ```bash
@@ -101,3 +105,16 @@ RelationColumn::morphTo('subject', [
 ---
 
 Both methods work identically on `RelationEntry` for infolists.
+
+---
+
+### Visibility on Parent Pages
+
+By default, columns and entries are automatically hidden when shown inside the related resource's own relation manager pages. For example, a `UserResource` column will be hidden on any of User's relation manager pages.
+
+To override this behavior, chain `->hiddenOn([])` to show the column everywhere:
+
+```php
+RelationColumn::belongsTo(UserResource::class)
+    ->hiddenOn([])
+```

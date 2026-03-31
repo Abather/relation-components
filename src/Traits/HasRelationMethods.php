@@ -7,17 +7,26 @@ use Illuminate\Database\Eloquent\Model;
 
 trait HasRelationMethods
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->color('info');
+        $this->openUrlInNewTab();
+    }
+
     /**
-     * @param  class-string<\Filament\Resources\Resource>  $resource
+     * @param class-string<Resource> $resource
      */
     public static function belongsTo(
-        string $resource,
+        string  $resource,
         ?string $relation = null,
         ?string $titleAttribute = null,
         ?string $label = null,
         ?string $page = 'view',
-        bool $withIcon = true
-    ): static {
+        bool    $withIcon = true
+    ): static
+    {
         $titleAttribute ??= static::resolveTitleAttribute($resource);
         $label ??= $resource::getModelLabel();
         $relation ??= str($resource::getModel())->classBasename()->camel()->value();
@@ -33,14 +42,13 @@ trait HasRelationMethods
             ->page($page)
             ->withIcon($withIcon)
             ->label($label)
-            ->color('info')
             ->icon($icon)
-            ->url(fn ($record) => static::getRecordUrl($resource, data_get($record, $relation), $page))
-            ->openUrlInNewTab();
+            ->hiddenOn($resource::getRelations())
+            ->url(fn($record) => static::getRecordUrl($resource, data_get($record, $relation), $page));
     }
 
     /**
-     * @param  array<class-string, class-string<\Filament\Resources\Resource>>  $types
+     * @param array<class-string, class-string<Resource>> $types
      *                                                                                  Keyed by fully-qualified model class, e.g.:
      *                                                                                  [ Farm::class => FarmResource::class, Plot::class => PlotResource::class ]
      *
@@ -49,12 +57,13 @@ trait HasRelationMethods
      *          or use ->modifyQueryUsing(fn ($q) => $q->with('relation')).
      */
     public static function morphTo(
-        string $relation,
-        array $types,
+        string  $relation,
+        array   $types,
         ?string $label = null,
         ?string $page = 'view',
-        bool $withIcon = true
-    ): static {
+        bool    $withIcon = true
+    ): static
+    {
         $label ??= str($relation)->headline()->value();
 
         // Create a closure-scoped cache
@@ -64,12 +73,18 @@ trait HasRelationMethods
         $getCachedResource = function (Model $record) use ($relation, $types, &$cache) {
             $recordId = $record->getKey();
 
-            if (! isset($cache[$recordId])) {
+            if (!isset($cache[$recordId])) {
                 $cache[$recordId] = static::resolveMorphResource($record, $relation, $types);
             }
 
             return $cache[$recordId];
         };
+
+        $relationPages = [];
+
+        foreach ($types as $type) {
+            $relationPages = array_merge($relationPages, $type::getRelations());
+        }
 
         /** @var static $instance */
         $instance = static::make("{$relation}_type");
@@ -79,9 +94,9 @@ trait HasRelationMethods
             ->page($page)
             ->withIcon($withIcon)
             ->label($label)
-            ->color('info')
+            ->hiddenOn($relationPages)
             ->icon(function ($record) use ($getCachedResource, $withIcon) {
-                if (! $withIcon) {
+                if (!$withIcon) {
                     return null;
                 }
 
@@ -92,7 +107,7 @@ trait HasRelationMethods
             ->formatStateUsing(function ($record) use ($relation, $getCachedResource) {
                 $related = data_get($record, $relation);
 
-                if (! $related) {
+                if (!$related) {
                     return '-';
                 }
 
@@ -108,12 +123,11 @@ trait HasRelationMethods
                 $resource = $getCachedResource($record);
                 $related = data_get($record, $relation);
 
-                if (! $resource || ! $related) {
+                if (!$resource || !$related) {
                     return null;
                 }
 
                 return static::getRecordUrl($resource, $related, $page);
-            })
-            ->openUrlInNewTab();
+            });
     }
 }
