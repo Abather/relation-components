@@ -18,57 +18,54 @@ Filament table columns and infolist entries for `belongsTo` and `morphTo` relati
 composer require abather/relation-components
 ```
 
+---
+
 ## Usage
 
-### Table Column
+### `BelongsToColumn` / `BelongsToEntry`
+
+Pass the resource class directly to `make()`. All configuration is derived automatically.
 
 ```php
-use Abather\RelationComponents\Tables\Columns\RelationColumn;
+use Abather\RelationComponents\Tables\Columns\BelongsToColumn;
+use Abather\RelationComponents\Infolists\Components\BelongsToEntry;
+
+BelongsToColumn::make(UserResource::class)
+
+BelongsToEntry::make(UserResource::class)
 ```
 
-### Infolist Entry
+Available options (all chainable):
 
 ```php
-use Abather\RelationComponents\Infolists\Components\RelationEntry;
-```
-
----
-
-### `belongsTo`
-
-Displays the related record's title with a link to its resource page.
-
-```php
-RelationColumn::belongsTo(UserResource::class)
-```
-
-All parameters are optional except `$resource`:
-
-```php
-RelationColumn::belongsTo(
-    resource:       UserResource::class,
-    relation:       'user',         // auto-derived from model class name
-    titleAttribute: 'name',         // auto-derived from resource configuration
-    label:          'User',         // auto-derived from resource model label
-    page:           'view',         // default: 'view'
-    withIcon:       true,           // default: true
-)
+BelongsToColumn::make(UserResource::class)
+    ->page('edit')          // default: 'view'
+    ->withIcon(false)       // default: true
+    ->label('Owner')
+    ->color('success')
 ```
 
 ---
 
-### `morphTo`
+### `MorphToColumn` / `MorphToEntry`
 
-Displays a polymorphic related record with a link to its resource page.
+Pass the relation name to `make()` and provide the type map via `->types()`.
 
 ```php
-RelationColumn::morphTo(
-    relation: 'subject',
-    types: [
+use Abather\RelationComponents\Tables\Columns\MorphToColumn;
+use Abather\RelationComponents\Infolists\Components\MorphToEntry;
+
+MorphToColumn::make('subject')
+    ->types([
         Farm::class => FarmResource::class,
         Plot::class => PlotResource::class,
-    ],
-)
+    ])
+
+MorphToEntry::make('subject')
+    ->types([
+        Farm::class => FarmResource::class,
+        Plot::class => PlotResource::class,
+    ])
 ```
 
 > **N+1 warning:** eager-load the relation to avoid per-row queries.
@@ -82,39 +79,56 @@ RelationColumn::morphTo(
 
 ---
 
-### Customization
+## Global Configuration
 
-Both methods return a standard `TextColumn` / `TextEntry` instance, so any method from those classes can be chained after to override the defaults:
+Since these classes extend Filament's `TextColumn` and `TextEntry`, they can be configured globally in your `AppServiceProvider` the same way:
 
 ```php
-RelationColumn::belongsTo(UserResource::class)
+use Abather\RelationComponents\Tables\Columns\BelongsToColumn;
+use Abather\RelationComponents\Tables\Columns\MorphToColumn;
+use Abather\RelationComponents\Infolists\Components\BelongsToEntry;
+use Abather\RelationComponents\Infolists\Components\MorphToEntry;
+
+public function boot(): void
+{
+    BelongsToColumn::configureUsing(fn (BelongsToColumn $column) => $column
+        ->color('primary')
+        ->openUrlInNewTab(false)
+    );
+
+    MorphToEntry::configureUsing(fn (MorphToEntry $entry) => $entry
+        ->color('warning')
+    );
+}
+```
+
+---
+
+## Customization
+
+Any method from `TextColumn` / `TextEntry` can be chained to override the defaults:
+
+```php
+BelongsToColumn::make(UserResource::class)
     ->color('success')
     ->icon('heroicon-o-user')
     ->openUrlInNewTab(false)
-    ->label('Owner')
-```
 
-```php
-RelationColumn::morphTo('subject', [
-    Farm::class => FarmResource::class,
-    Plot::class => PlotResource::class,
-])->color('warning')
-  ->icon(null)
+MorphToEntry::make('subject')
+    ->types([Farm::class => FarmResource::class])
+    ->color('warning')
+    ->icon(null)
 ```
 
 ---
 
-Both methods work identically on `RelationEntry` for infolists.
-
----
-
-### Visibility on Parent Pages
+## Visibility on Parent Pages
 
 By default, columns and entries are automatically hidden when shown inside the related resource's own relation manager pages. For example, a `UserResource` column will be hidden on any of User's relation manager pages.
 
-To override this behavior, chain `->hiddenOn([])` to show the column everywhere:
+To override this behavior, chain `->hiddenOn([])`:
 
 ```php
-RelationColumn::belongsTo(UserResource::class)
+BelongsToColumn::make(UserResource::class)
     ->hiddenOn([])
 ```

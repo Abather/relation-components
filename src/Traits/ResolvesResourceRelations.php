@@ -5,11 +5,12 @@ namespace Abather\RelationComponents\Traits;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Filament\Resources\Resource;
 
 trait ResolvesResourceRelations
 {
     /**
-     * @param  class-string<\Filament\Resources\Resource>  $resource
+     * @param  class-string<Resource>  $resource
      */
     protected static function resolveTitleAttribute(string $resource): string
     {
@@ -17,7 +18,7 @@ trait ResolvesResourceRelations
     }
 
     /**
-     * @return class-string<\Filament\Resources\Resource> | null
+     * @return class-string<Resource> | null
      */
     protected static function resolveMorphResource(Model $record, string $relation, array $types): ?string
     {
@@ -43,7 +44,7 @@ trait ResolvesResourceRelations
     }
 
     /**
-     * @param  class-string<\Filament\Resources\Resource>  $resource
+     * @param  class-string<Resource>  $resource
      */
     protected static function getRecordUrl(string $resource, ?Model $record, string $page): ?string
     {

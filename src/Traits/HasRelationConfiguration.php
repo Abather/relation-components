@@ -81,4 +81,9 @@ trait HasRelationConfiguration
     {
         return $this->evaluate($this->page) ?? 'view';
     }
+
+    public function getWithIcon(): bool
+    {
+        return $this->withIcon;
+    }
 }
