@@ -79,11 +79,33 @@ MorphToEntry::make('subject')
 
 ---
 
+### `BelongsToSelect`
+
+A form select for `belongsTo` relationships. Pass the resource class to `make()` — the relation, label, and title attribute are all derived automatically.
+
+```php
+use Abather\RelationComponents\Forms\Components\BelongsToSelect;
+
+BelongsToSelect::make(UserResource::class)
+```
+
+Available options (all chainable):
+
+```php
+BelongsToSelect::make(UserResource::class)
+    ->withIcon(false)       // default: true — shows resource icon as suffix
+    ->preload(false)        // default: true
+    ->label('Assigned To')
+```
+
+---
+
 ## Global Configuration
 
 Since these classes extend Filament's `TextColumn` and `TextEntry`, they can be configured globally in your `AppServiceProvider` the same way:
 
 ```php
+use Abather\RelationComponents\Forms\Components\BelongsToSelect;
 use Abather\RelationComponents\Tables\Columns\BelongsToColumn;
 use Abather\RelationComponents\Tables\Columns\MorphToColumn;
 use Abather\RelationComponents\Infolists\Components\BelongsToEntry;
@@ -91,6 +113,11 @@ use Abather\RelationComponents\Infolists\Components\MorphToEntry;
 
 public function boot(): void
 {
+    BelongsToSelect::configureUsing(fn (BelongsToSelect $select) => $select
+        ->preload(false)
+        ->withIcon(false)
+    );
+
     BelongsToColumn::configureUsing(fn (BelongsToColumn $column) => $column
         ->color('primary')
         ->openUrlInNewTab(false)
