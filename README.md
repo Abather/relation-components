@@ -1,7 +1,7 @@
 
 # Relation Components
 
-![Relation Components](https://banners.beyondco.de/Relation%20Components.png?theme=light&packageManager=composer+require&packageName=abather%2Frelation-components&pattern=architect&style=style_1&description=Relation+%22BelongsTo%2C+MorphTo%22+TextColumn+and+TextEntry&md=1&showWatermark=1&fontSize=100px&images=https%3A%2F%2Flaravel.com%2Fimg%2Flogomark.min.svg)
+![Relation Components](https://i.ibb.co/dSj32xy/relation-components-banner.jpg)
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/abather/relation-components.svg?style=flat-square)](https://packagist.org/packages/abather/relation-components)
 [![Total Downloads](https://img.shields.io/packagist/dt/abather/relation-components.svg?style=flat-square)](https://packagist.org/packages/abather/relation-components)
@@ -146,6 +146,33 @@ MorphToEntry::make('subject')
     ->color('warning')
     ->icon(null)
 ```
+
+---
+
+## Authorization Visibility
+
+By default, columns and entries are always rendered regardless of whether the current user is authorized to view the related record's page. You can change this by calling `->hideWhenNotAuthorizedToView()`, which will completely hide the field if the user does not have permission to view the related resource.
+
+```php
+BelongsToColumn::make(UserResource::class)
+    ->hideWhenNotAuthorizedToView()
+
+BelongsToEntry::make(UserResource::class)
+    ->hideWhenNotAuthorizedToView()
+
+MorphToEntry::make('subject')
+    ->types([Farm::class => FarmResource::class])
+    ->hideWhenNotAuthorizedToView()
+```
+
+When this is enabled, the visibility is determined as follows:
+
+- If no related record is loaded yet (e.g. on a list page), `canViewAny()` on the resource is checked.
+- If a related record is available, `canView($record)` on the resource is checked.
+
+The field is hidden entirely when the check fails — the user will not see the field at all, not just an empty value.
+
+> **URL authorization:** Even without `->hideWhenNotAuthorizedToView()`, the link is always authorization-aware. The URL is only generated when all of the following are true: a related record exists, the target page exists on the resource, and `canView($record)` passes. If the user is not authorized to view the record, the field renders as plain text with no link.
 
 ---
 

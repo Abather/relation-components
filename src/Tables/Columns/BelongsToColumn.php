@@ -14,7 +14,7 @@ class BelongsToColumn extends TextColumn
     use ResolvesResourceRelations;
 
     /**
-     * @param class-string<Resource> $name
+     * @param  class-string<resource>  $name
      */
     public static function make(?string $name = null): static
     {
@@ -29,13 +29,13 @@ class BelongsToColumn extends TextColumn
         }
 
         if (! is_subclass_of($name, Resource::class)) {
-            throw new LogicException("Column of class [$columnClass] requires a Filament resource class, [$name] does not extend [" . Resource::class . "].");
+            throw new LogicException("Column of class [$columnClass] requires a Filament resource class, [$name] does not extend [".Resource::class.'].');
         }
 
-        /** @var class-string<Resource> $resource */
-        $resource       = $name;
+        /** @var class-string<resource> $resource */
+        $resource = $name;
         $titleAttribute = static::resolveTitleAttribute($resource);
-        $relation       = str($resource::getModel())->classBasename()->camel()->value();
+        $relation = str($resource::getModel())->classBasename()->camel()->value();
 
         /** @var static $static */
         $static = app($columnClass, ['name' => "{$relation}.{$titleAttribute}"]);
@@ -46,6 +46,7 @@ class BelongsToColumn extends TextColumn
             ->label($resource::getModelLabel())
             ->icon(fn () => $static->getWithIcon() ? $resource::getNavigationIcon() : null)
             ->hiddenOn($resource::getRelations())
+            ->hidden(fn () => $static->resolveHideWhenNotAuthorizedToView($resource))
             ->url(fn ($record) => static::getRecordUrl(
                 $resource,
                 data_get($record, $relation),

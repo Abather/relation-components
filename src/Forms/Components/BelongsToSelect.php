@@ -14,7 +14,7 @@ class BelongsToSelect extends Select
     use ResolvesResourceRelations;
 
     /**
-     * @param class-string<Resource> $name
+     * @param  class-string<resource>  $name
      */
     public static function make(?string $name = null): static
     {
@@ -24,15 +24,15 @@ class BelongsToSelect extends Select
             throw new LogicException("Component of class [$componentClass] must have a unique name, passed to the [make()] method.");
         }
 
-        if (!class_exists($name)) {
+        if (! class_exists($name)) {
             throw new LogicException("Component of class [$componentClass] requires a valid resource class, [$name] does not exist.");
         }
 
-        if (!is_subclass_of($name, Resource::class)) {
-            throw new LogicException("Component of class [$componentClass] requires a Filament resource class, [$name] does not extend [" . Resource::class . "].");
+        if (! is_subclass_of($name, Resource::class)) {
+            throw new LogicException("Component of class [$componentClass] requires a Filament resource class, [$name] does not extend [".Resource::class.'].');
         }
 
-        /** @var class-string<Resource> $resource */
+        /** @var class-string<resource> $resource */
         $resource = $name;
         $titleAttribute = static::resolveTitleAttribute($resource);
         $relation = str($resource::getModel())->classBasename()->camel()->value();

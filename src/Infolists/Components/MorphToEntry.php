@@ -14,7 +14,7 @@ class MorphToEntry extends TextEntry
     use HasRelationConfiguration;
     use ResolvesResourceRelations;
 
-    /** @var array<class-string<Model>, class-string<Resource>> */
+    /** @var array<class-string<Model>, class-string<resource>> */
     protected array $types = [];
 
     private array $cache = [];
@@ -39,6 +39,7 @@ class MorphToEntry extends TextEntry
 
                 $resource = $static->resolveFromCache($record);
 
+                /** @var class-string<resource> $resource */
                 return $resource ? $resource::getNavigationIcon() : null;
             })
             ->formatStateUsing(function ($record) use ($static) {
@@ -56,9 +57,10 @@ class MorphToEntry extends TextEntry
 
                 return data_get($related, $titleAttribute) ?? '-';
             })
+            ->hidden(fn ($record) => $static->resolveHideWhenNotAuthorizedToView($static->resolveFromCache($record), $record))
             ->url(function ($record) use ($static) {
                 $resource = $static->resolveFromCache($record);
-                $related  = data_get($record, $static->getRelationName());
+                $related = data_get($record, $static->getRelationName());
 
                 if (! $resource || ! $related) {
                     return null;
@@ -73,7 +75,7 @@ class MorphToEntry extends TextEntry
     }
 
     /**
-     * @param  array<class-string<Model>, class-string<Resource>>  $types
+     * @param  array<class-string<Model>, class-string<resource>>  $types
      */
     public function types(array $types): static
     {
@@ -83,7 +85,7 @@ class MorphToEntry extends TextEntry
             }
 
             if (! is_subclass_of($resourceClass, Resource::class)) {
-                throw new LogicException("[$resourceClass] does not extend [" . Resource::class . "].");
+                throw new LogicException("[$resourceClass] does not extend [".Resource::class.'].');
             }
         }
 

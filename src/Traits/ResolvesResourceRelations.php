@@ -2,15 +2,15 @@
 
 namespace Abather\RelationComponents\Traits;
 
+use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Filament\Resources\Resource;
 
 trait ResolvesResourceRelations
 {
     /**
-     * @param  class-string<Resource>  $resource
+     * @param  class-string<resource>  $resource
      */
     protected static function resolveTitleAttribute(string $resource): string
     {
@@ -18,7 +18,7 @@ trait ResolvesResourceRelations
     }
 
     /**
-     * @return class-string<Resource> | null
+     * @return class-string<resource> | null
      */
     protected static function resolveMorphResource(Model $record, string $relation, array $types): ?string
     {
@@ -44,11 +44,35 @@ trait ResolvesResourceRelations
     }
 
     /**
-     * @param  class-string<Resource>  $resource
+     * @param  class-string<resource>|null  $resource
+     */
+    public function resolveHideWhenNotAuthorizedToView(?string $resource, ?Model $record = null): bool
+    {
+        if (! $this->getHideWhenNotAuthorizedToView()) {
+            return false;
+        }
+
+        if (blank($resource)) {
+            return false;
+        }
+
+        if (blank($record)) {
+            return ! $resource::canViewAny();
+        }
+
+        return ! $resource::canView($record);
+    }
+
+    /**
+     * @param  class-string<resource>  $resource
      */
     protected static function getRecordUrl(string $resource, ?Model $record, string $page): ?string
     {
         if (blank($record) || blank($resource) || ! $resource::hasPage($page)) {
+            return null;
+        }
+
+        if (! $resource::canView($record)) {
             return null;
         }
 

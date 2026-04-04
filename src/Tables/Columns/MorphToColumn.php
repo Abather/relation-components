@@ -14,7 +14,7 @@ class MorphToColumn extends TextColumn
     use HasRelationConfiguration;
     use ResolvesResourceRelations;
 
-    /** @var array<class-string<Model>, class-string<Resource>> */
+    /** @var array<class-string<Model>, class-string<resource>> */
     protected array $types = [];
 
     private array $cache = [];
@@ -58,7 +58,7 @@ class MorphToColumn extends TextColumn
             })
             ->url(function ($record) use ($static) {
                 $resource = $static->resolveFromCache($record);
-                $related  = data_get($record, $static->getRelationName());
+                $related = data_get($record, $static->getRelationName());
 
                 if (! $resource || ! $related) {
                     return null;
@@ -73,7 +73,7 @@ class MorphToColumn extends TextColumn
     }
 
     /**
-     * @param  array<class-string<Model>, class-string<Resource>>  $types
+     * @param  array<class-string<Model>, class-string<resource>>  $types
      */
     public function types(array $types): static
     {
@@ -83,7 +83,7 @@ class MorphToColumn extends TextColumn
             }
 
             if (! is_subclass_of($resourceClass, Resource::class)) {
-                throw new LogicException("[$resourceClass] does not extend [" . Resource::class . "].");
+                throw new LogicException("[$resourceClass] does not extend [".Resource::class.'].');
             }
         }
 

@@ -14,7 +14,7 @@ class BelongsToEntry extends TextEntry
     use ResolvesResourceRelations;
 
     /**
-     * @param class-string<Resource> $namee
+     * @param  class-string<resource>  $name
      */
     public static function make(?string $name = null): static
     {
@@ -29,13 +29,13 @@ class BelongsToEntry extends TextEntry
         }
 
         if (! is_subclass_of($name, Resource::class)) {
-            throw new LogicException("Entry of class [$entryClass] requires a Filament resource class, [$name] does not extend [" . Resource::class . "].");
+            throw new LogicException("Entry of class [$entryClass] requires a Filament resource class, [$name] does not extend [".Resource::class.'].');
         }
 
-        /** @var class-string<Resource> $resource */
-        $resource       = $name;
+        /** @var class-string<resource> $resource */
+        $resource = $name;
         $titleAttribute = static::resolveTitleAttribute($resource);
-        $relation       = str($resource::getModel())->classBasename()->camel()->value();
+        $relation = str($resource::getModel())->classBasename()->camel()->value();
 
         /** @var static $static */
         $static = app($entryClass, ['name' => "{$relation}.{$titleAttribute}"]);
@@ -46,6 +46,7 @@ class BelongsToEntry extends TextEntry
             ->label($resource::getModelLabel())
             ->icon(fn () => $static->getWithIcon() ? $resource::getNavigationIcon() : null)
             ->hiddenOn($resource::getRelations())
+            ->hidden(fn ($record) => $static->resolveHideWhenNotAuthorizedToView($resource, $record))
             ->url(fn ($record) => static::getRecordUrl(
                 $resource,
                 data_get($record, $relation),

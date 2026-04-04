@@ -16,6 +16,8 @@ trait HasRelationConfiguration
 
     protected bool $withUrl = true;
 
+    protected bool $hideWhenNotAuthorizedToView = false;
+
     // ─── Fluent setters ───────────────────────────────────────────────────────
 
     public function resourceClass(string|\Closure $resource): static
@@ -60,6 +62,13 @@ trait HasRelationConfiguration
         return $this;
     }
 
+    public function hideWhenNotAuthorizedToView(bool $hideWhenNotAuthorizedToView = true): static
+    {
+        $this->hideWhenNotAuthorizedToView = $hideWhenNotAuthorizedToView;
+
+        return $this;
+    }
+
     // ─── Getters ──────────────────────────────────────────────────────────────
 
     public function getResourceClass(): ?string
@@ -85,5 +94,10 @@ trait HasRelationConfiguration
     public function getWithIcon(): bool
     {
         return $this->withIcon;
+    }
+
+    public function getHideWhenNotAuthorizedToView(): bool
+    {
+        return $this->hideWhenNotAuthorizedToView;
     }
 }
