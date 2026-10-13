@@ -6,9 +6,55 @@ use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use LogicException;
 
 trait ResolvesResourceRelations
 {
+    /**
+     * @return class-string<resource>
+     */
+    protected static function ensureIsResourceClass(?string $resource): string
+    {
+        $componentClass = static::class;
+
+        if (blank($resource)) {
+            throw new LogicException("Component of class [$componentClass] must have a unique name, passed to the [make()] method.");
+        }
+
+        if (! class_exists($resource)) {
+            throw new LogicException("Component of class [$componentClass] requires a valid resource class, [$resource] does not exist.");
+        }
+
+        if (! is_subclass_of($resource, Resource::class)) {
+            throw new LogicException("Component of class [$componentClass] requires a Filament resource class, [$resource] does not extend [".Resource::class.'].');
+        }
+
+        return $resource;
+    }
+
+    /**
+     * @param  class-string<resource>  $resource
+     */
+    protected static function resolveRelationName(string $resource, ?string $relationship = null): string
+    {
+        return $relationship ?? str($resource::getModel())->classBasename()->camel()->value();
+    }
+
+    /**
+     * Uses the resource's model label unless a custom relationship name was given,
+     * e.g. `author` on a `UserResource` reads "Author", not "User".
+     *
+     * @param  class-string<resource>  $resource
+     */
+    protected static function resolveRelationLabel(string $resource, string $relation): string
+    {
+        if ($relation === static::resolveRelationName($resource)) {
+            return $resource::getModelLabel();
+        }
+
+        return str($relation)->headline()->value();
+    }
+
     /**
      * @param  class-string<resource>  $resource
      */
@@ -41,41 +87,5 @@ trait ResolvesResourceRelations
         }
 
         return $types[get_class($related)] ?? null;
-    }
-
-    /**
-     * @param  class-string<resource>|null  $resource
-     */
-    public function resolveHideWhenNotAuthorizedToView(?string $resource, ?Model $record = null): bool
-    {
-        if (! $this->getHideWhenNotAuthorizedToView()) {
-            return false;
-        }
-
-        if (blank($resource)) {
-            return false;
-        }
-
-        if (blank($record)) {
-            return ! $resource::canViewAny();
-        }
-
-        return ! $resource::canView($record);
-    }
-
-    /**
-     * @param  class-string<resource>  $resource
-     */
-    protected static function getRecordUrl(string $resource, ?Model $record, string $page): ?string
-    {
-        if (blank($record) || blank($resource) || ! $resource::hasPage($page)) {
-            return null;
-        }
-
-        if (! $resource::canView($record)) {
-            return null;
-        }
-
-        return $resource::getUrl($page, ['record' => $record]);
     }
 }

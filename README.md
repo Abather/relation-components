@@ -35,12 +35,20 @@ BelongsToColumn::make(UserResource::class)
 BelongsToEntry::make(UserResource::class)
 ```
 
+By default the relation name is the camel-cased model name (`UserResource` → `user`). When the relation is named differently, pass it as the second argument. This also lets you use the same resource more than once in a table:
+
+```php
+BelongsToColumn::make(UserResource::class, 'author')     // label: "Author"
+BelongsToColumn::make(UserResource::class, 'updatedBy')  // label: "Updated By"
+```
+
 Available options (all chainable):
 
 ```php
 BelongsToColumn::make(UserResource::class)
-    ->page('edit')          // default: 'view'
+    ->page('edit')          // default: 'view' (falls back to 'edit' when the resource has no view page)
     ->withIcon(false)       // default: true
+    ->withUrl(false)        // default: true — render as plain text without a link
     ->label('Owner')
     ->color('success')
 ```
@@ -68,6 +76,8 @@ MorphToEntry::make('subject')
     ])
 ```
 
+> **Sorting & searching:** the column's state is the `{relation}_type` attribute, so `->sortable()` sorts by morph type and `->searchable()` searches the type column. Use `->searchable(query: fn (Builder $query, string $search) => ...)` to search the related records instead.
+
 > **N+1 warning:** eager-load the relation to avoid per-row queries.
 > ```php
 > // In your resource:
@@ -89,6 +99,13 @@ use Abather\RelationComponents\Forms\Components\BelongsToSelect;
 BelongsToSelect::make(UserResource::class)
 ```
 
+The field is named after the foreign key (`user_id`), so the value is included when the record is created. Pass the relation name and/or foreign key when they don't follow the convention:
+
+```php
+BelongsToSelect::make(UserResource::class, 'author')                 // field: author_id
+BelongsToSelect::make(UserResource::class, 'author', 'written_by')   // field: written_by
+```
+
 Available options (all chainable):
 
 ```php
@@ -102,7 +119,7 @@ BelongsToSelect::make(UserResource::class)
 
 ## Global Configuration
 
-Since these classes extend Filament's `TextColumn` and `TextEntry`, they can be configured globally in your `AppServiceProvider` the same way:
+Since these classes extend Filament's `Select`, `TextColumn` and `TextEntry`, they can be configured globally in your `AppServiceProvider` the same way:
 
 ```php
 use Abather\RelationComponents\Forms\Components\BelongsToSelect;
@@ -167,12 +184,12 @@ MorphToEntry::make('subject')
 
 When this is enabled, the visibility is determined as follows:
 
-- If no related record is loaded yet (e.g. on a list page), `canViewAny()` on the resource is checked.
-- If a related record is available, `canView($record)` on the resource is checked.
+- **Table columns** are shown or hidden for the whole table, so `BelongsToColumn` checks `canViewAny()` on the resource. `MorphToColumn` can't know the resource without a record, so it is never hidden by this option (its links are still authorization-aware).
+- **Entries** check `canView($related)` against the related record, or `canViewAny()` when there is no related record.
 
 The field is hidden entirely when the check fails — the user will not see the field at all, not just an empty value.
 
-> **URL authorization:** Even without `->hideWhenNotAuthorizedToView()`, the link is always authorization-aware. The URL is only generated when all of the following are true: a related record exists, the target page exists on the resource, and `canView($record)` passes. If the user is not authorized to view the record, the field renders as plain text with no link.
+> **URL authorization:** Even without `->hideWhenNotAuthorizedToView()`, the link is always authorization-aware. The URL is only generated when all of the following are true: `withUrl()` is enabled, a related record exists, the target page exists on the resource, and the user is authorized — `canEdit($record)` for the edit page, `canView($record)` for any other page. Otherwise the field renders as plain text with no link.
 
 ---
 
@@ -180,9 +197,13 @@ The field is hidden entirely when the check fails — the user will not see the 
 
 By default, columns and entries are automatically hidden when shown inside the related resource's own relation manager pages. For example, a `UserResource` column will be hidden on any of User's relation manager pages.
 
-To override this behavior, chain `->hiddenOn([])`:
+Relation managers inside a `RelationGroup` and ones registered as `RelationManager::make([...])` are included.
+
+To turn this off, chain `->hiddenOnParentPages(false)`:
 
 ```php
 BelongsToColumn::make(UserResource::class)
-    ->hiddenOn([])
+    ->hiddenOnParentPages(false)
 ```
+
+> **Note:** Filament keeps only the last condition passed to `->hidden()` / `->hiddenOn()`. Calling either on these components replaces both the parent-page and the authorization checks. Use `->visible()` to add your own condition on top of them.
